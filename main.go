@@ -31,10 +31,17 @@ var blackList = []string{"google", "知乎", "即刻"}
 // 等待时间
 var waitTime = 5
 
+// 设定每日开始时间
+var beginTime = 9
+
+// 设定每日结束时间
+var endTime = 18
+
 func main() {
 	a := app.New()
 	w := a.NewWindow("Hello")
 
+	// 每日开始结束时间初始化
 	output, entry, button := myApp.makeUI()
 	// Vbox就是从上到下堆叠组件
 	w.SetContent(container.NewVBox(output, entry, button))
@@ -51,44 +58,70 @@ func main() {
 
 // takeARest 20分钟提醒休息一下
 func takeARest() {
+	tick := time.Tick(20 * time.Minute)
 	for {
-		time.Sleep(20 * time.Minute)
-		fyne.CurrentApp().SendNotification(&fyne.Notification{
-			Title:   "休息一下",
-			Content: "看电脑20分钟了，休息一下比较好",
-		})
+		if isInWorkTime() {
+			fyne.CurrentApp().SendNotification(&fyne.Notification{
+				Title:   "休息一下",
+				Content: "看电脑20分钟了，休息一下比较好",
+			})
+		}
+		<-tick
 	}
 }
 
 func fishCheck() {
-	lastLearnTime := time.Now()
+	tick := time.Tick(time.Second)
 	for {
-		time.Sleep(5 * time.Second)
-		title := strings.ToLower(robotgo.GetTitle())
-		// 白名单内直接 ，然后判断是否在黑名单内
-		if isInWhiteList(title) {
-			continue
+		if isInWorkTime() {
+			fishCheckTask()
 		}
-		// 黑名单内直接判断
-		if isInBlackList(title) {
-			// 记录摸鱼时间,如果超过5分钟就弹窗
-			// todo 5分钟以后可以手动配置
-			if time.Now().Sub(lastLearnTime) > time.Duration(waitTime)*time.Minute {
-				fmt.Println("摸鱼时间超过5分钟")
-				// 获取今日日期
-				today := time.Now().Format("2006-01-02")
-				fishesMap[today] = fishesMap[today] + 1
-				fyne.CurrentApp().SendNotification(&fyne.Notification{
-					Title:   "摸鱼警告",
-					Content: "你已经摸鱼5分钟了,今日共摸鱼" + fmt.Sprintf("%d", fishesMap[today]) + "次",
-				})
-				lastLearnTime = time.Now()
-			}
-		} else {
-			// 清空最近摸鱼时间
+		<-tick
+	}
+}
+
+func fishCheckTask() {
+	lastLearnTime := time.Now()
+	title := strings.ToLower(robotgo.GetTitle())
+	// 白名单内直接 ，然后判断是否在黑名单内
+	if isInWhiteList(title) {
+		return
+	}
+	// 黑名单内直接判断
+	if isInBlackList(title) {
+		// 记录摸鱼时间,如果超过5分钟就弹窗
+		// todo 5分钟以后可以手动配置
+		if time.Now().Sub(lastLearnTime) > time.Duration(waitTime)*time.Minute {
+			fmt.Println("摸鱼时间超过5分钟")
+			// 获取今日日期
+			today := time.Now().Format("2006-01-02")
+			fishesMap[today] = fishesMap[today] + 1
+			fyne.CurrentApp().SendNotification(&fyne.Notification{
+				Title:   "摸鱼警告",
+				Content: "你已经摸鱼5分钟了,今日共摸鱼" + fmt.Sprintf("%d", fishesMap[today]) + "次",
+			})
 			lastLearnTime = time.Now()
 		}
+	} else {
+		// 清空最近摸鱼时间
+		lastLearnTime = time.Now()
 	}
+}
+
+func isInWorkTime() bool {
+	now := time.Now()
+	hour := now.Hour()
+	minute := now.Minute()
+	if hour < beginTime || hour > endTime {
+		return false
+	}
+	if hour == beginTime && minute < 30 {
+		return false
+	}
+	if hour == endTime && minute > 0 {
+		return false
+	}
+	return true
 }
 
 func isInWhiteList(title string) bool {
