@@ -14,11 +14,11 @@ import (
 func (app *Config) getToolBar() *widget.Toolbar {
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarSpacer(),
-		widget.NewToolbarAction(theme.DocumentCreateIcon(), func() {
+		widget.NewToolbarAction(theme.ContentAddIcon(), func() {
 			app.addTaskDialog()
 		}),
 		widget.NewToolbarAction(theme.DocumentCreateIcon(), func() {
-			app.addHoldingDialog()
+			app.addPrizeDialog()
 		}),
 		widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {
 			app.refreshSum()
@@ -112,7 +112,62 @@ func (app *Config) addTaskDialog() dialog.Dialog {
 				}
 
 				// 刷新列表
-				app.refreshTaskList()
+				app.refreshTasksTable()
+			}
+		},
+		app.MainWindow)
+
+	addForm.Resize(fyne.Size{Width: 400})
+	addForm.Show()
+
+	return addForm
+}
+
+func (app *Config) addPrizeDialog() dialog.Dialog {
+	// 奖品描述
+	prizeDescEntry := widget.NewMultiLineEntry()
+	// 奖品积分
+	prizeScoreEntry := widget.NewEntry()
+	prizeScoreEntry.Validator = isIntValidator
+	// 是否重复
+	prizeRepeatEntry := widget.NewSelect([]string{"是", "否"}, func(s string) {
+	})
+	// 新建一个对话框
+	addForm := dialog.NewForm(
+		"新增奖品",
+		"添加",
+		"取消",
+		[]*widget.FormItem{
+			{Text: "描述", Widget: prizeDescEntry},
+			{Text: "积分", Widget: prizeScoreEntry},
+			{Text: "是否重复", Widget: prizeRepeatEntry},
+		},
+		func(valid bool) {
+			if valid {
+				// strconv 处理字符串
+				desc := prizeDescEntry.Text
+				score, _ := strconv.Atoi(prizeScoreEntry.Text)
+				repeat := prizeRepeatEntry.Selected
+				repeatInt := 0
+				if repeat == "是" {
+					repeatInt = 1
+				} else {
+					repeatInt = 0
+				}
+				// 保存到数据库
+				_, err := app.DB.InsertPrize(repository.Prize{
+					Description: desc,
+					Points:      score,
+					IsRepeat:    repeatInt,
+				})
+
+				if err != nil {
+					app.ErrorLog.Println(err)
+					return
+				}
+
+				app.refreshPrizesTable()
+
 			}
 		},
 		app.MainWindow)

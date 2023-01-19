@@ -20,7 +20,7 @@ func (app *Config) makeUI() {
 	toolBar := app.getToolBar()
 	app.ToolBar = toolBar
 	tasksTabContent := app.tasksTab()
-	holdingsTab := app.holdingsTab()
+	holdingsTab := app.prizesTab()
 	imgTab := app.imgTab()
 
 	// 创建标签页
@@ -69,17 +69,17 @@ func (app *Config) refreshSum() {
 	app.Summary.Refresh()
 }
 
-// refreshTaskList 刷新任务列表
-func (app *Config) refreshTaskList() {
+// refreshTasksTable 刷新任务列表
+func (app *Config) refreshTasksTable() {
 	app.InfoLog.Println("刷新任务列表")
 	app.Tasks = app.getTaskSlice()
 	app.TasksTable.Refresh()
 }
 
-func (app *Config) refreshHoldingsTable() {
+func (app *Config) refreshPrizesTable() {
 	app.InfoLog.Println("刷新奖品列表")
-	app.Holdings = app.getHoldingSlice()
-	app.HoldingsTable.Refresh()
+	app.Prizes = app.getPrizeSlice()
+	app.PrizesTable.Refresh()
 }
 
 func (app *Config) imgTab() *fyne.Container {

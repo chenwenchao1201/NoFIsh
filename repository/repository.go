@@ -14,24 +14,18 @@ var (
 // connect to a database
 type Repository interface {
 	Migrate() error
-	// Holdings
-	InsertHolding(h Holdings) (*Holdings, error)
-	AllHoldings() ([]Holdings, error)
-	GetHoldingByID(id int) (*Holdings, error)
-	UpdateHolding(id int64, updated Holdings) error
-	DeleteHolding(id int64) error
 	// tasks
 	InsertTask(t Task) (*Task, error)
 	AllTasks() ([]Task, error)
-	//GetTaskByID(id int) (*Task, error)
-	//UpdateTask(id int64, updated Task) error
-	//DeleteTask(id int64) error
+	GetTaskByID(id int) (*Task, error)
+	UpdateTask(id int64, updated Task) error
+	DeleteTask(id int64) error
 	//// prizes
-	//InsertPrize(p Prize) (*Prize, error)
-	//AllPrizes() ([]Prize, error)
-	//GetPrizeByID(id int) (*Prize, error)
-	//UpdatePrize(id int64, updated Prize) error
-	//DeletePrize(id int64) error
+	InsertPrize(p Prize) (*Prize, error)
+	AllPrizes() ([]Prize, error)
+	GetPrizeByID(id int) (*Prize, error)
+	UpdatePrize(id int64, updated Prize) error
+	DeletePrize(id int64) error
 }
 
 // Holdings is the type for the user's gold holdings
@@ -63,8 +57,6 @@ type Prize struct {
 	Points int `json:"points"`
 	// 是否重复兑换
 	IsRepeat int `json:"is_repeat"`
-	// 兑换时间
-	ExchangeTime time.Time `json:"exchange_time"`
 }
 
 type summary struct {

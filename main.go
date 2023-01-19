@@ -6,17 +6,13 @@ import (
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/flopp/go-findfont"
+	_ "github.com/glebarez/go-sqlite"
 	"github.com/goki/freetype/truetype"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
-	"time"
-
-	_ "github.com/glebarez/go-sqlite"
 )
 
 type App struct {
@@ -40,10 +36,10 @@ type Config struct {
 	// 数据库
 	DB repository.Repository
 	// 任务相关
-	Tasks         [][]interface{}
-	TasksTable    *widget.Table
-	Holdings      [][]interface{}
-	HoldingsTable *widget.Table
+	Tasks       [][]interface{}
+	TasksTable  *widget.Table
+	Prizes      [][]interface{}
+	PrizesTable *widget.Table
 
 	// 添加任务临时存放
 	appTask *AppTask
@@ -136,82 +132,4 @@ func (app *Config) connectSQL() (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-func (app *Config) addHoldingDialog() dialog.Dialog {
-	addAmountEntry := widget.NewEntry()
-	purChaseDateEntry := widget.NewEntry()
-	purchasePriceEntry := widget.NewEntry()
-	//app.AddHoldingsPurChaseAmountEntry = addAmountEntry
-	//app.AddHoldingsPurChaseDateEntry = purChaseDateEntry
-	//app.AddHoldingsPurChasePriceEntry = purchasePriceEntry
-
-	dateValidator := func(text string) error {
-		if _, err := time.Parse("2006-01-02", text); err != nil {
-			return err
-		}
-
-		return nil
-	}
-	purChaseDateEntry.Validator = dateValidator
-
-	isIntValidator := func(text string) error {
-		_, err := strconv.Atoi(text)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-
-	addAmountEntry.Validator = isIntValidator
-
-	isFloatValidator := func(text string) error {
-		_, err := strconv.ParseFloat(text, 32)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-
-	purchasePriceEntry.Validator = isFloatValidator
-
-	purChaseDateEntry.PlaceHolder = "YYYY-MM-DD"
-
-	addForm := dialog.NewForm(
-		"Add gold",
-		"Add",
-		"Cancel",
-		[]*widget.FormItem{
-			{Text: "Amount om toz", Widget: addAmountEntry},
-			{Text: "PurChase price", Widget: purchasePriceEntry},
-			{Text: "PurChase date", Widget: purChaseDateEntry},
-		},
-		func(valid bool) {
-			if valid {
-				amount, _ := strconv.Atoi(addAmountEntry.Text)
-				purchasePrice, _ := strconv.ParseFloat(purchasePriceEntry.Text, 32)
-				purchaseDate, _ := time.Parse("2006-01-02", purChaseDateEntry.Text)
-				purchasePrice = purchasePrice * 100.0
-
-				_, err := app.DB.InsertHolding(repository.Holdings{
-					Amount:        amount,
-					PurchaseDate:  purchaseDate,
-					PurchasePrice: int(purchasePrice),
-				})
-
-				if err != nil {
-					app.ErrorLog.Println(err)
-					return
-				}
-
-				app.refreshHoldingsTable()
-
-			}
-		},
-		app.MainWindow)
-
-	addForm.Resize(fyne.Size{Width: 400})
-	addForm.Show()
-
-	return addForm
 }

@@ -40,12 +40,12 @@ func (app *Config) getTasksTable() *widget.Table {
 					dialog.ShowConfirm("删除任务", "确定删除当前任务？", func(delete bool) {
 						if delete {
 							id, _ := strconv.Atoi(app.Tasks[i.Row][0].(string))
-							err := app.DB.DeleteHolding(int64(id))
+							err := app.DB.DeleteTask(int64(id))
 							if err != nil {
 								app.ErrorLog.Println(err)
 							}
 						}
-						app.refreshTaskList()
+						app.refreshTasksTable()
 					}, app.MainWindow)
 				})
 				w.Importance = widget.HighImportance
@@ -55,7 +55,7 @@ func (app *Config) getTasksTable() *widget.Table {
 			}
 		})
 
-	colWidths := []float32{30, 100, 300, 100, 100, 100, 30}
+	colWidths := []float32{30, 100, 350, 80, 70, 70, 60}
 	for i := 0; i < len(colWidths); i++ {
 		table.SetColumnWidth(i, colWidths[i])
 	}
@@ -78,7 +78,14 @@ func (app *Config) getTaskSlice() [][]interface{} {
 		currentRow = append(currentRow, x.Name)
 		currentRow = append(currentRow, x.Description)
 		currentRow = append(currentRow, x.DueDate.Format("2006-01-02"))
-		currentRow = append(currentRow, strconv.FormatInt(int64(x.Priority), 10))
+		switch int64(x.Priority) {
+		case 1:
+			currentRow = append(currentRow, "高")
+		case 2:
+			currentRow = append(currentRow, "中")
+		case 3:
+			currentRow = append(currentRow, "低")
+		}
 		currentRow = append(currentRow, strconv.FormatInt(int64(x.Points), 10))
 		currentRow = append(currentRow, widget.NewButtonWithIcon("删除", theme.DeleteIcon(), func() {}))
 		slice = append(slice, currentRow)
