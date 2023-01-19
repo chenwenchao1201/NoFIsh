@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/flopp/go-findfont"
@@ -50,20 +51,20 @@ type Config struct {
 
 var myApp Config
 
-//func main() {
-//
-//	// 创建应用
-//	app := app.NewWithID("com.earl")
-//	myApp.App = app
-//	// 窗口初始化
-//	initApp(app)
-//	// 检查是否摸鱼
-//	go fishCheck()
-//	// 提醒休息一下，不管是不是在工作
-//	go takeARest()
-//	// 启动
-//	myApp.MainWindow.ShowAndRun()
-//}
+func main() {
+
+	// 创建应用
+	app := app.NewWithID("com.earl")
+	myApp.App = app
+	// 窗口初始化
+	initApp(app)
+	// 检查是否摸鱼
+	go fishCheck()
+	// 提醒休息一下，不管是不是在工作
+	go takeARest()
+	// 启动
+	myApp.MainWindow.ShowAndRun()
+}
 
 func initApp(app fyne.App) {
 	// 赋予一个初始值
