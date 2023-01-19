@@ -21,11 +21,12 @@ func (app *Config) makeUI() {
 	app.ToolBar = toolBar
 	tasksTabContent := app.tasksTab()
 	holdingsTab := app.holdingsTab()
+	imgTab := app.imgTab()
 
 	// 创建标签页
 	tabs := container.NewAppTabs(
 		container.NewTabItemWithIcon("当前任务", theme.HomeIcon(), tasksTabContent),
-		container.NewTabItemWithIcon("任务设置", theme.InfoIcon(), canvas.NewText("任务设置和修改", nil)),
+		container.NewTabItemWithIcon("任务设置", theme.InfoIcon(), imgTab),
 		container.NewTabItemWithIcon("奖品区域", theme.InfoIcon(), holdingsTab),
 	)
 	tabs.SetTabLocation(container.TabLocationTop)
@@ -79,4 +80,18 @@ func (app *Config) refreshHoldingsTable() {
 	app.InfoLog.Println("刷新奖品列表")
 	app.Holdings = app.getHoldingSlice()
 	app.HoldingsTable.Refresh()
+}
+
+func (app *Config) imgTab() *fyne.Container {
+
+	var img *canvas.Image
+	img = canvas.NewImageFromFile("gold.png ")
+	img.SetMinSize(fyne.Size{Width: 770, Height: 410})
+
+	img.FillMode = canvas.ImageFillOriginal
+
+	charContainer := container.NewVBox(img)
+
+	return charContainer
+
 }
