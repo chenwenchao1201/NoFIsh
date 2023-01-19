@@ -1,0 +1,77 @@
+package repository
+
+import (
+	"testing"
+	"time"
+)
+
+func TestSQLiteRepository_Migrate(t *testing.T) {
+	err := testRepo.Migrate()
+	if err != nil {
+		t.Error("Migrate failed", err)
+	}
+}
+func TestSQLiteRepository_InsertHolding(t *testing.T) {
+	h := Holdings{
+		Amount:        1,
+		PurchaseDate:  time.Now(),
+		PurchasePrice: 1000,
+	}
+	result, err := testRepo.InsertHolding(h)
+	if err != nil {
+		t.Error("Migrate failed", err)
+	}
+	if result.ID <= 0 {
+		t.Error("invalid id sent back", result.ID)
+	}
+}
+func TestSQLiteRepository_AllHoldings(t *testing.T) {
+	h, err := testRepo.AllHoldings()
+
+	if err != nil {
+		t.Error("Migrate failed", err)
+	}
+	if len(h) != 1 {
+		t.Error("wrong number of holdings returned", len(h))
+	}
+
+}
+func TestSQLiteRepository_GetHoldingByID(t *testing.T) {
+	h, err := testRepo.GetHoldingByID(1)
+
+	if err != nil {
+		t.Error("Migrate failed", err)
+	}
+	if h.PurchasePrice != 1000 {
+		t.Error("wrong price returned", h.PurchasePrice)
+	}
+}
+func TestSQLiteRepository_UpdateHolding(t *testing.T) {
+	h, err := testRepo.GetHoldingByID(1)
+
+	if err != nil {
+		t.Error(err)
+	}
+	h.PurchasePrice = 1001
+
+	err = testRepo.UpdateHolding(1, *h)
+	if err != nil {
+		t.Error("Update failed", err)
+	}
+}
+func TestSQLiteRepository_DeleteHolding(t *testing.T) {
+	err := testRepo.DeleteHolding(1)
+
+	if err != nil {
+		t.Error("failed to delete holding", err)
+		if err != errDeleteFailed {
+			t.Error("wrong error returned")
+		}
+
+	}
+	err = testRepo.DeleteHolding(2)
+	if err == nil {
+		t.Error("No error expected")
+	}
+
+}
